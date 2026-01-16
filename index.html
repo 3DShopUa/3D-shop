@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DShop | Complete Edition</title>
+    <style>
+        :root {
+            --main-color: #00ff88;
+            --bg-color: #0a0a0a;
+            --card-bg: #151515;
+            --text-color: #ffffff;
+            --border-color: #222;
+        }
+
+        body.light-mode {
+            --bg-color: #f5f5f5;
+            --card-bg: #ffffff;
+            --text-color: #1a1a1a;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            transition: 0.3s;
+        }
+
+        /* ШАПКА */
+        header {
+            padding: 15px 5%; display: flex; justify-content: space-between;
+            align-items: center; background: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky; top: 0; z-index: 100;
+        }
+
+        .avatar-circle { 
+            width: 40px; height: 40px; border-radius: 50%; 
+            border: 2px solid var(--main-color); 
+            background-size: cover; background-position: center; cursor: pointer; 
+        }
+
+        /* МОДАЛЬНІ ВІКНА */
+        .modal {
+            display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: var(--card-bg); padding: 25px; border-radius: 20px;
+            z-index: 500; width: 90%; max-width: 450px;
+            border: 2px solid var(--main-color); box-shadow: 0 0 40px rgba(0,0,0,0.6);
+            max-height: 85vh; overflow-y: auto;
+        }
+
+        .overlay { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px); z-index: 400; 
+        }
+
+        /* СЕКЦІЇ НАЛАШТУВАНЬ */
+        .settings-section {
+            background: rgba(128, 128, 128, 0.08);
+            padding: 15px; border-radius: 12px; margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 0.75rem; text-transform: uppercase;
+            color: var(--main-color); margin-bottom: 10px; font-weight: bold;
+        }
+
+        /* КНОПКИ ТА ПОЛЯ */
+        .btn { 
+            background: var(--main-color); color: #000; border: none; padding: 12px; 
+            border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; 
+            margin-top: 10px; transition: 0.2s; 
+        }
+        .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+
+        input, textarea { 
+            width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; 
+            border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); 
+            color: inherit; box-sizing: border-box; font-family: inherit;
+        }
+
+        .catalog { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 40px 5%; }
+        .item { background: var(--card-bg); border-radius: 15px; border: 1px solid var(--border-color); overflow: hidden; cursor: pointer; }
+
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+    </style>
+</head>
+<body>
+
+<div id="auth-screen">
+    <div style="background: var(--card-bg); padding: 30px; border-radius: 25px; border: 2px solid var(--main-color); width: 320px; text-align: center;">
+        <h2 style="color: var(--main-color); margin-top:0;">3DShop | Вхід</h2>
+        <div id="reg-preview" style="width:80px; height:80px; border-radius:50%; border:2px dashed var(--main-color); margin: 0 auto 15px; cursor:pointer; display:flex; align-items:center; justify-content:center; background-size:cover; background-position:center;" onclick="document.getElementById('file-reg').click()">+</div>
+        <input type="file" id="file-reg" hidden onchange="handleFile(this, 'reg')">
+        <input type="text" id="reg-name" placeholder="Твоє ім'я">
+        <input type="text" id="reg-tg" placeholder="Telegram @username">
+        <input type="text" id="reg-addr" placeholder="Адреса доставки">
+        <button class="btn" onclick="saveUser()">Почати покупки</button>
+    </div>
+</div>
+
+<header>
+    <h1 style="color: var(--main-color); margin:0;">3DShop</h1>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <div id="header-avatar" class="avatar-circle" onclick="openSettings()"></div>
+        <button class="btn" onclick="openCart()" style="width:auto; margin:0; padding:8px 15px;">🛒 <span id="cart-count">0</span></button>
+    </div>
+</header>
+
+<div class="catalog">
+    <div class="item" onclick="viewProduct('bat men halment', 100, 'https://np.elegoo.com/images/247b3ca4413699ec013e56f3b4edde143b6ae2fc928fd39d9181aec27ee3c74a-1766445333159-2db0bc8b628fd3ae99277ed774834da30c099e4e4435ec75b436940bf43f01de.png?x-oss-process=image/resize,w_1200/format,webp', 'брелок для ключів є три коліри: синій жовтий сірий.')">
+        <img src="https://np.elegoo.com/images/247b3ca4413699ec013e56f3b4edde143b6ae2fc928fd39d9181aec27ee3c74a-1766445333159-2db0bc8b628fd3ae99277ed774834da30c099e4e4435ec75b436940bf43f01de.png?x-oss-process=image/resize,w_1200/format,webp" style="width:100%;">
+        <div style="padding:15px;"><h3>bat men halment</h3><p>100 грн</p></div>
+    </div>
+</div>
+
+<div id="settings-modal" class="modal">
+    <h2 style="margin-top:0; color: var(--main-color);">Налаштування</h2>
+
+    <div class="settings-section">
+        <div class="section-title">👤 Мій профіль</div>
+        <div style="display:flex; align-items:center; gap:15px; margin-bottom:10px;">
+            <div id="settings-preview" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--main-color); background-size:cover; background-position:center; cursor:pointer;" onclick="document.getElementById('file-settings').click()"></div>
+            <div>
+                <b id="info-name"></b><br>
+                <span id="info-tg" style="color:#888;"></span>
+            </div>
+        </div>
+        <input type="file" id="file-settings" hidden onchange="handleFile(this, 'settings')">
+        
+        <div class="section-title" style="margin-top:10px;">📍 Адреса доставки</div>
+        <input type="text" id="edit-addr" placeholder="Змінити адресу" onchange="updateAddress(this.value)">
+    </div>
+
+    <div class="settings-section">
+        <div class="section-title">🎨 Інтерфейс</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span>Колір сайту</span>
+            <input type="color" onchange="changeColor(this.value)" style="border:none; cursor:pointer; background:none; width:40px; height:40px;">
+        </div>
+        <button class="btn" style="background:#333; color:white;" onclick="toggleTheme()">Змінити тему</button>
+    </div>
+
+    <button class="btn" style="background:#ff4444; color:white;" onclick="logout()">Вийти</button>
+    <button class="btn" style="background:#444; color:white;" onclick="closeModals()">Закрити</button>
+</div>
+
+<div id="product-modal" class="modal">
+    <img id="m-img" src="" style="width:100%; border-radius:12px;">
+    <h2 id="m-title" style="color:var(--main-color); margin:15px 0 5px;"></h2>
+    <p id="m-desc" style="color:#aaa; font-size:0.9rem; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;"></p>
+    <textarea id="m-comment" placeholder="Коментар до замовлення..."></textarea>
+    <h3 id="m-price" style="margin: 15px 0;"></h3>
+    <button class="btn" id="m-add-btn">Додати в кошик</button>
+    <button class="btn" style="background:#444; color:white;" onclick="closeModals()">Назад</button>
+</div>
+
+<div id="cart-modal" class="modal">
+    <h3 style="color:var(--main-color); margin-top:0;">Кошик</h3>
+    <div id="cart-list"></div>
+    <p style="font-size:1.1rem;">Сума: <b id="total-price" style="color:var(--main-color);">0</b> грн</p>
+    <button class="btn" onclick="checkout()">Надіслати замовлення</button>
+    <button class="btn" style="background:#444; color:white;" onclick="closeModals()">Закрити</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeModals()"></div>
+
+<script>
+    let cart = [];
+    let currentUser = { avatar: '', name: '', tg: '', addr: '' };
+
+    window.onload = function() {
+        const saved = localStorage.getItem('user_3d_final');
+        if(saved) {
+            currentUser = JSON.parse(saved);
+            document.getElementById('auth-screen').style.display = 'none';
+            updateUI();
+        }
+        if(localStorage.getItem('user_color')) changeColor(localStorage.getItem('user_color'), false);
+        if(localStorage.getItem('user_theme') === 'light') document.body.classList.add('light-mode');
+    };
+
+    function handleFile(input, mode) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            currentUser.avatar = e.target.result;
+            if(mode === 'reg') {
+                document.getElementById('reg-preview').style.backgroundImage = `url('${e.target.result}')`;
+                document.getElementById('reg-preview').innerText = "";
+            } else {
+                localStorage.setItem('user_3d_final', JSON.stringify(currentUser));
+                updateUI();
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+
+    function saveUser() {
+        currentUser.name = document.getElementById('reg-name').value;
+        currentUser.tg = document.getElementById('reg-tg').value;
+        currentUser.addr = document.getElementById('reg-addr').value;
+        if(!currentUser.name || !currentUser.tg || !currentUser.addr) return alert("Заповніть всі поля!");
+        if(!currentUser.avatar) currentUser.avatar = 'https://www.w3schools.com/howto/img_avatar.png';
+        localStorage.setItem('user_3d_final', JSON.stringify(currentUser));
+        location.reload();
+    }
+
+    function updateUI() {
+        document.getElementById('header-avatar').style.backgroundImage = `url('${currentUser.avatar}')`;
+        document.getElementById('settings-preview').style.backgroundImage = `url('${currentUser.avatar}')`;
+        document.getElementById('info-name').innerText = currentUser.name;
+        document.getElementById('info-tg').innerText = currentUser.tg;
+        document.getElementById('edit-addr').value = currentUser.addr;
+    }
+
+    function updateAddress(newAddr) {
+        currentUser.addr = newAddr;
+        localStorage.setItem('user_3d_final', JSON.stringify(currentUser));
+    }
+
+    function viewProduct(title, price, img, desc) {
+        document.getElementById('m-title').innerText = title;
+        document.getElementById('m-price').innerText = price + " грн";
+        document.getElementById('m-img').src = img;
+        document.getElementById('m-desc').innerText = desc;
+        document.getElementById('m-comment').value = "";
+        document.getElementById('m-add-btn').onclick = () => {
+            cart.push({id: Date.now(), title, price, comment: document.getElementById('m-comment').value || "Немає"});
+            document.getElementById('cart-count').innerText = cart.length;
+            closeModals();
+        };
+        document.getElementById('product-modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function openCart() {
+        const list = document.getElementById('cart-list');
+        let total = 0;
+        list.innerHTML = cart.length ? "" : "Кошик порожній";
+        cart.forEach(item => {
+            list.innerHTML += `<div style="margin-bottom:10px; border-bottom:1px solid var(--border-color); padding-bottom:5px;">
+                <div style="display:flex; justify-content:space-between;"><b>${item.title}</b> <span>${item.price} грн <span onclick="remove(${item.id})" style="color:red; cursor:pointer; margin-left:8px;">✕</span></span></div>
+                <div style="font-size:0.7rem; color:var(--main-color);">💬: ${item.comment}</div>
+            </div>`;
+            total += item.price;
+        });
+        document.getElementById('total-price').innerText = total;
+        document.getElementById('cart-modal').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
+    }
+
+    function remove(id) { cart = cart.filter(i => i.id !== id); document.getElementById('cart-count').innerText = cart.length; openCart(); }
+    function openSettings() { document.getElementById('settings-modal').style.display = 'block'; document.getElementById('overlay').style.display = 'block'; }
+    function closeModals() { document.querySelectorAll('.modal, .overlay').forEach(m => m.style.display = 'none'); }
+    function changeColor(c, s=true) { document.documentElement.style.setProperty('--main-color', c); if(s) localStorage.setItem('user_color', c); }
+    function toggleTheme() { document.body.classList.toggle('light-mode'); localStorage.setItem('user_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark'); }
+    function logout() { localStorage.clear(); location.reload(); }
+
+    function checkout() {
+        if(!cart.length) return alert("Кошик порожній!");
+        const u = currentUser;
+        let msg = `📦 НОВЕ ЗАМОВЛЕННЯ\n👤 Клієнт: ${u.name}\n📱 Telegram: ${u.tg}\n📍 Адреса: ${u.addr}\n\nТовари:\n`;
+        cart.forEach((i, n) => msg += `${n+1}. ${i.title} (${i.price} грн)\n   💬: ${i.comment}\n`);
+        
+        const botToken = "8334100064:AAHy-vZEWjI3h_yuojd9XHL4UFcDc3Kg-UY";
+        const chatId = "5796612318";
+        
+        fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(msg)}`)
+        .then(() => { alert("Надіслано!"); cart = []; document.getElementById('cart-count').innerText = "0"; closeModals(); });
+    }
+</script>
+</body>
+</html>
