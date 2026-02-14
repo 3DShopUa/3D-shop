@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Craft Shop.ЮА</title>
+    <style>
+        :root { --bg-color: #050505; --card-color: #111; --neon-color: #00ffcc; --text-color: #ffffff; }
+        body { background-color: var(--bg-color); color: var(--text-color); font-family: 'Segoe UI', sans-serif; margin: 0; padding-bottom: 100px; transition: 0.3s; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: #000; border-bottom: 2px solid var(--neon-color); }
+        .user-avatar { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--neon-color); cursor: pointer; object-fit: cover; }
+        .search-container { padding: 20px; }
+        #searchInput { width: 100%; padding: 12px; background: #111; border: 1px solid var(--neon-color); color: white; border-radius: 10px; outline: none; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 15px; padding: 20px; }
+        .mini-card { background: var(--card-color); border-radius: 12px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.2s; position: relative; }
+        .mini-card:hover { border-color: var(--neon-color); box-shadow: 0 0 10px var(--neon-color); }
+        .img-container { width: 100%; height: 160px; background: #222; overflow: hidden; }
+        .mini-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .price-tag { color: var(--neon-color); font-weight: bold; padding: 10px; text-align: center; }
+        .bottom-nav { position: fixed; z-index: 1000; background: rgba(0,0,0,0.9); padding: 12px 25px; border: 1px solid var(--neon-color); display: flex; gap: 25px; box-shadow: 0 0 15px var(--neon-color); }
+        @media (min-width: 769px) { .bottom-nav { right: 30px; bottom: 30px; flex-direction: column; border-radius: 20px; } }
+        @media (max-width: 768px) { .bottom-nav { bottom: 20px; left: 50%; transform: translateX(-50%); flex-direction: row; border-radius: 50px; } }
+        .nav-btn { background: none; border: none; color: white; font-size: 24px; cursor: pointer; position: relative; }
+        .badge { position: absolute; top: -5px; right: -10px; background: red; font-size: 11px; padding: 2px 6px; border-radius: 50%; color: white; }
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #111; border: 2px solid var(--neon-color); padding: 20px; z-index: 2000; border-radius: 20px; width: 85%; max-width: 400px; }
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1999; }
+        .main-btn { width: 100%; padding: 12px; background: var(--neon-color); border: none; font-weight: bold; border-radius: 10px; cursor: pointer; color: #000; margin-top: 10px; }
+        .rev-item { display: flex; gap: 8px; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 5px; text-align: left; }
+        .rev-avatar { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; border: 1px solid var(--neon-color); }
+        .stars { color: gold; margin: 5px 0; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; background: #222; border: 1px solid #444; color: white; border-radius: 8px; box-sizing: border-box; }
+        .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #333; }
+        .del-btn { background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div style="font-size: 1.4rem; font-weight: bold;">3D SHOP<span style="color:var(--neon-color)">.ЮА</span></div>
+    <img id="head-avatar" class="user-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" onclick="openProfile()">
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Пошук..." oninput="trigramSearch()">
+</div>
+
+<div class="grid">
+    <div class="mini-card" data-name="шолом бетмена" onclick="openProduct('bat_01', 'Шолом Бетмена', 60, 'Професійний друк.')">
+        <div class="img-container">
+            <img src="bat.jpg" alt="Batman" onerror="this.src='https://via.placeholder.com/200/222/00ffcc?text=Шолом+Бетмена'">
+        </div>
+        <div class="price-tag">60 грн</div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <button class="nav-btn" onclick="openSettings()">⚙️</button>
+    <button class="nav-btn" onclick="openCart()">🛒 <span id="badge" class="badge" style="display:none">0</span></button>
+    <button class="nav-btn" onclick="window.scrollTo({top:0, behavior:'smooth'})">🔝</button>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeAll()"></div>
+
+<div class="modal" id="productModal">
+    <h2 id="m-title" style="margin:0"></h2>
+    <p id="m-desc" style="color:#aaa; font-size:14px;"></p>
+    <div id="m-price" class="price-tag" style="font-size:1.5rem;"></div>
+    <button class="main-btn" onclick="addToCart()">Додати в кошик</button>
+    
+    <div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+        <b>Відгуки:</b>
+        <div id="rev-list" style="max-height:120px; overflow-y:auto; margin-top:10px;"></div>
+        <div style="display:flex; gap:5px; margin-top:10px;">
+            <select id="rev-stars" style="width:80px;"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option></select>
+            <input type="text" id="rev-text" placeholder="Ваш відгук..." style="flex-grow:1;">
+            <button onclick="postReview()" style="background:var(--neon-color); border:none; border-radius:8px; padding:0 10px; cursor:pointer; color:#000; font-weight:bold;">OK</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="cartModal">
+    <h3>Мій кошик</h3>
+    <div id="cart-items"></div>
+    <div id="cart-total" style="margin:15px 0; font-weight:bold; border-top:1px solid #333; padding-top:10px;">Разом: 0 грн</div>
+    <button class="main-btn" onclick="sendOrder()">Замовити</button>
+</div>
+
+<div class="modal" id="profileModal">
+    <h3>Профіль</h3>
+    <div style="text-align:center;">
+        <img id="prof-img" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid var(--neon-color);">
+        <br><label style="color:var(--neon-color); font-size:12px; cursor:pointer;">Змінити фото <input type="file" style="display:none" onchange="uploadAvatar(event)"></label>
+    </div>
+    <input type="text" id="uName" placeholder="Твоє ім'я">
+    <input type="text" id="uAddr" placeholder="Адреса">
+    <button class="main-btn" onclick="saveProfile()">Зберегти</button>
+</div>
+
+<div class="modal" id="settingsModal">
+    <h3>Налаштування</h3>
+    <label>Фон:</label><input type="color" id="bgC" oninput="updateStyles()">
+    <label>Неон:</label><input type="color" id="neC" oninput="updateStyles()">
+    <button class="main-btn" onclick="closeAll()">Готово</button>
+</div>
+
+<script>
+    let cart = [];
+    let currentItem = null;
+    let reviewsStorage = JSON.parse(localStorage.getItem('myReviews')) || {};
+
+    const TG_TOKEN = "8271783983:AAFau1ixSnUD0oDU0P-9S-P8KDEppxFTnuQ";
+    const TG_CHAT_ID = "5796612318";
+
+    function trigramSearch() {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        document.querySelectorAll('.mini-card').forEach(c => {
+            c.style.display = c.getAttribute('data-name').includes(q) ? "block" : "none";
+        });
+    }
+
+    function uploadAvatar(e) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            localStorage.setItem('uImg', reader.result);
+            document.getElementById('head-avatar').src = reader.result;
+            document.getElementById('prof-img').src = reader.result;
+        };
+        reader.readAsDataURL(e.target.files[0]);
+    }
+
+    function openProduct(id, name, price, desc) {
+        currentItem = { id, name, price };
+        document.getElementById('m-title').innerText = name;
+        document.getElementById('m-desc').innerText = desc;
+        document.getElementById('m-price').innerText = price + " грн";
+        renderReviews(id);
+        document.getElementById('productModal').style.display = "block";
+        document.getElementById('overlay').style.display = "block";
+    }
+
+    function postReview() {
+        const txt = document.getElementById('rev-text').value;
+        const stars = document.getElementById('rev-stars').value;
+        if(!txt) return;
+        const rev = { 
+            name: localStorage.getItem('uName') || 'Гість', 
+            txt: txt, 
+            stars: parseInt(stars),
+            img: localStorage.getItem('uImg') || "https://cdn-icons-png.flaticon.com/512/149/149071.png" 
+        };
+        if(!reviewsStorage[currentItem.id]) reviewsStorage[currentItem.id] = [];
+        reviewsStorage[currentItem.id].unshift(rev);
+        localStorage.setItem('myReviews', JSON.stringify(reviewsStorage));
+        renderReviews(currentItem.id); // Оновлюємо відразу
+        document.getElementById('rev-text').value = "";
+    }
+
+    function renderReviews(id) {
+        const list = document.getElementById('rev-list');
+        const reviews = reviewsStorage[id] || [];
+        list.innerHTML = reviews.map(r => `
+            <div class="rev-item">
+                <img src="${r.img}" class="rev-avatar">
+                <div>
+                    <b>${r.name}</b> <span class="stars">${"⭐".repeat(r.stars)}</span><br>
+                    ${r.txt}
+                </div>
+            </div>
+        `).join('') || "Поки немає відгуків";
+    }
+
+    function addToCart() {
+        cart.push({...currentItem, cId: Date.now()});
+        updateBadge();
+        closeAll();
+    }
+
+    function removeFromCart(cId) {
+        cart = cart.filter(i => i.cId !== cId);
+        updateBadge();
+        openCart();
+    }
+
+    function updateBadge() {
+        const b = document.getElementById('badge');
+        b.innerText = cart.length;
+        b.style.display = cart.length > 0 ? "block" : "none";
+    }
+
+    function openCart() {
+        const items = document.getElementById('cart-items');
+        let total = 0;
+        items.innerHTML = cart.map(i => {
+            total += i.price;
+            return `<div class="cart-item"><span>${i.name} (${i.price} грн)</span><button class="del-btn" onclick="removeFromCart(${i.cId})">❌</button></div>`;
+        }).join('') || "Кошик порожній";
+        document.getElementById('cart-total').innerText = `Разом: ${total} грн`;
+        document.getElementById('cartModal').style.display = "block";
+        document.getElementById('overlay').style.display = "block";
+    }
+
+    function updateStyles() {
+        const bg = document.getElementById('bgC').value;
+        const ne = document.getElementById('neC').value;
+        document.documentElement.style.setProperty('--bg-color', bg);
+        document.documentElement.style.setProperty('--neon-color', ne);
+        localStorage.setItem('saved-bg', bg);
+        localStorage.setItem('saved-ne', ne);
+    }
+
+    function saveProfile() {
+        localStorage.setItem('uName', document.getElementById('uName').value);
+        localStorage.setItem('uAddr', document.getElementById('uAddr').value);
+        closeAll();
+    }
+
+    function openProfile() {
+        document.getElementById('uName').value = localStorage.getItem('uName') || "";
+        document.getElementById('uAddr').value = localStorage.getItem('uAddr') || "";
+        document.getElementById('profileModal').style.display = "block";
+        document.getElementById('overlay').style.display = "block";
+    }
+
+    function openSettings() { document.getElementById('settingsModal').style.display = "block"; document.getElementById('overlay').style.display = "block"; }
+    function closeAll() { document.querySelectorAll('.modal, .overlay').forEach(el => el.style.display = "none"); }
+
+    function sendOrder() {
+        if(cart.length === 0) return;
+        let text = `🚀 ЗАМОВЛЕННЯ\n👤 ${localStorage.getItem('uName') || 'Невідомий'}\n📍 ${localStorage.getItem('uAddr') || 'Не вказана'}\n🛒 Товари: ${cart.map(i => i.name).join(', ')}`;
+        fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage?chat_id=${TG_CHAT_ID}&text=${encodeURIComponent(text)}`)
+        .then(() => { alert("Замовлення надіслано!"); cart = []; updateBadge(); closeAll(); });
+    }
+
+    window.onload = () => {
+        if(localStorage.getItem('uImg')) {
+            document.getElementById('head-avatar').src = localStorage.getItem('uImg');
+            document.getElementById('prof-img').src = localStorage.getItem('uImg');
+        }
+        if(localStorage.getItem('saved-bg')) document.documentElement.style.setProperty('--bg-color', localStorage.getItem('saved-bg'));
+        if(localStorage.getItem('saved-ne')) document.documentElement.style.setProperty('--neon-color', localStorage.getItem('saved-ne'));
+    };
+</script>
+</body>
+</html>
