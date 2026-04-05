@@ -1,0 +1,235 @@
+/**
+ * 3D Shop UA - Final Stable CSS
+ * Власник: Микита
+ * Виправлено: Статичні фото на головній, акуратні квадрати, ідеальний grid
+ */
+
+:root {
+    --main-bg: #f5f7f9;
+    --white: #ffffff;
+    --dark: #1d1d1f;
+    --accent: #ff6600;
+    --red: #e74c3c;
+    --gray: #8e8e93;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Segoe UI', sans-serif; }
+body { background: var(--main-bg); padding-bottom: 90px; color: var(--dark); }
+.container { max-width: 600px; margin: 0 auto; padding: 0 15px; }
+
+/* ШАПКА */
+header { background: white; padding: 20px 0; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; text-align: center; }
+.logo { font-size: 22px; font-weight: 800; margin-bottom: 10px; }
+.nav-links { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+.nav-link-btn { text-decoration: none; font-size: 13px; color: #555; font-weight: 600; }
+
+/* ПОШУК */
+.search-wrapper { position: relative; width: 100%; margin-bottom: 15px; }
+.search-wrapper input { 
+    width: 100%; padding: 14px 20px 14px 45px; border-radius: 12px; 
+    border: 1px solid #e0e0e0; background: #f0f2f5; outline: none; font-size: 16px; transition: 0.3s;
+}
+.search-wrapper input:focus { border-color: var(--accent); background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+.search-wrapper::before { content: "🔍"; position: absolute; left: 18px; top: 50%; transform: translateY(-50%); opacity: 0.5; z-index: 1; }
+
+/* КАТЕГОРІЇ */
+.categories { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.cat-btn { padding: 8px 16px; border-radius: 10px; border: 1px solid #ddd; background: white; cursor: pointer; font-weight: 600; white-space: nowrap; transition: 0.2s; font-size: 13px; }
+.cat-btn.active { background: var(--dark); color: white; border-color: var(--dark); }
+
+/* --- СІТКА ТОВАРІВ (Ідеальна) --- */
+.grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; /* 2 колонки */
+    gap: 12px; 
+    padding: 15px 0; 
+}
+.card { 
+    background: white; 
+    padding: 10px; 
+    border-radius: 20px; 
+    position: relative; 
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04); 
+    display: flex; 
+    flex-direction: column; 
+    cursor: pointer; 
+}
+
+/* --- ФОТО НА ГОЛОВНІЙ (СТАТИЧНЕ, АКУРАТНЕ) --- */
+.card-image-static { 
+    position: relative; 
+    width: 100%; 
+    height: 180px; /* КВАДРАТ */
+    overflow: hidden; 
+    border-radius: 14px; 
+    margin-bottom: 8px; 
+    background: #f0f0f0; 
+}
+
+.card-image-static img { 
+    width: 100%; 
+    height: 100%; 
+    object-fit: cover; /* ОБРІЗАЄ ЗАЙВЕ, АЛЕ НЕ ДЕФОРМУЄ */
+    object-position: center; 
+}
+
+/* ІНФО ТОВАРУ */
+.card h3 { font-size: 14px; margin-bottom: 4px; font-weight: 700; color: #333; }
+.price-row { display: flex; align-items: center; gap: 6px; margin-top: auto; }
+.price-new { color: var(--accent); font-weight: 800; font-size: 16px; }
+.price-old { text-decoration: line-through; color: #bbb; font-size: 13px; font-weight: 500; }
+.sale-badge { position: absolute; top: 8px; left: 8px; background: var(--red); color: white; padding: 3px 8px; border-radius: 8px; font-weight: 800; font-size: 10px; z-index: 10; }
+
+/* НИЖНЄ МЕНЮ */
+.mobile-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 15px; border-top: 1px solid #eee; box-shadow: 0 -2px 10px rgba(0,0,0,0.03); z-index: 1000; }
+.nav-btn-link { text-decoration: none; color: var(--dark); font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 5px; }
+#cart-count { background: var(--accent); color: white; padding: 2px 7px; border-radius: 10px; font-size: 11px; }
+
+/* --- МОДАЛКА ТА СЛАЙДЕР В НІЙ --- */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 2000; padding: 20px; backdrop-filter: blur(5px); }
+.modal.show { display: flex; }
+.modal-content { background: white; padding: 25px; border-radius: 30px; width: 100%; max-width: 400px; position: relative; max-height: 90vh; overflow-y: auto; }
+.close-btn { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #888; }
+
+.slider-container { width: 100%; height: 250px; overflow: hidden; border-radius: 15px; margin-bottom: 15px; }
+.slides { display: flex; height: 100%; transition: transform 0.4s ease; }
+.slides img { min-width: 100%; width: 100%; height: 100%; object-fit: cover; }
+.slide-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.7); border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.slide-nav.prev { left: 10px; }
+.slide-nav.next { right: 10px; }
+.modal-content.slider { position: relative; } /* для навігації в модалці */
+
+.product-info h2 { font-size: 20px; font-weight: 700; margin-bottom: 10px; }
+.product-info p { font-size: 14px; color: #666; margin-bottom: 15px; }
+/* ГОЛОВНА КНОПКА (ЯК У APPLE/MODERN SHOPS) */
+.main-btn {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 50px; /* ПОВНІСТЮ ОВАЛЬНА */
+    border: none;
+    background: var(--dark); /* Твій темний колір */
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    outline: none;
+    -webkit-tap-highlight-color: transparent; /* прибирає синій квадрат при натисканні на мобільному */
+}
+
+/* Коли кнопка стає зеленою (Додано ✅) */
+.main-btn.success {
+    background: #27ae60 !important;
+    transform: scale(1.02);
+}
+
+/* Ефект при наведенні */
+.main-btn:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+
+/* Ефект при натисканні (стискання) */
+.main-btn:active {
+    transform: scale(0.96);
+}
+
+/* Стиль для кнопок "+" та "-" у кошику */
+.qty-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid #e0e0e0;
+    background: white;
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.qty-btn:hover {
+    background: #f0f0f0;
+    border-color: #ccc;
+}
+/* КНОПКА ВГОРУ */
+.top-btn {
+    position: fixed;
+    bottom: 85px; /* Над нижнім меню */
+    right: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(29, 29, 31, 0.8); /* Темна з прозорістю */
+    color: white;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    display: none; /* Спочатку прихована */
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    backdrop-filter: blur(5px); /* Ефект матового скла */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+}
+
+.top-btn:hover {
+    background: var(--accent); /* Стає помаранчевою при наведенні */
+    transform: translateY(-3px);
+}
+
+.top-btn.show {
+    display: flex; /* Показуємо, коли треба */
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* Кнопка замовлення з ефектами */
+.main-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 50px;
+    border: none;
+    background: #1d1d1f; /* Темний колір */
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Плавність */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* Ефект підкидання вгору при наведенні (як у карток) */
+.main-btn:hover {
+    transform: translateY(-5px); /* Піднімається на 5 пікселів */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    background: #333;
+}
+
+/* Ефект натискання (стискання) */
+.main-btn:active {
+    transform: translateY(-2px) scale(0.97);
+}
+
+/* Клас для підсвічування зеленим при успіху */
+.main-btn.success {
+    background: #27ae60 !important; /* Зелений колір */
+    box-shadow: 0 4px 15px rgba(39, 174, 96, 0.4);
+}
+.review-stars { color: #ff9500; }
