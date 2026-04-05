@@ -4,7 +4,7 @@ const products = [
     { 
         id: 1, title: "Зорбел (Zorbel)", 
         currentPrice: 30, oldPrice: 150, 
-        cat: ['flexi'], desc: "Деталізована фігурка Zorbel.", 
+        cat: ['figet', 'sale'], desc: "Деталізована фігурка Zorbel.", 
         imgs: ['zorbel2.jpg','zorbel1.jpg'] 
     },
     { 
@@ -16,7 +16,7 @@ const products = [
     { 
         id: 3, title: "Кріпер Minecraft", 
         currentPrice: 25, oldPrice:50, 
-        cat: ['toys'], desc: "Фігурка Кріпера для фанатів гри.", 
+        cat: ['toys', 'sale'], desc: "Фігурка Кріпера для фанатів гри.", 
         imgs: ['creeper.jpg'] 
     }
 ];
