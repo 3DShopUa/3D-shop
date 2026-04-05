@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Відгуки наших клієнтів | 3D Shop UA</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        reviews-grid {
+    display: grid;
+    /* На комп'ютері - 3 колонки, на планшеті - 2, на телефоні - 1 */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+    max-width: 1200px; /* Обмежуємо ширину, щоб відгуки не розповзлися на весь монітор */
+    margin: 0 auto;    /* Центруємо всю сітку по центру */
+}
+        .review-card {
+            background: white;
+            padding: 20px;
+            border-radius: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: 0.3s;
+            border: 1px solid #f0f0f0;
+        }
+        .review-card:hover { transform: translateY(-5px); }
+        .review-stars { color: #f1c40f; margin-bottom: 10px; font-size: 14px; }
+        .review-author { font-weight: 800; font-size: 16px; margin-bottom: 5px; }
+        .review-text-preview {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 3; /* Показує лише 3 рядки */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .review-date { font-size: 12px; color: #bbb; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="logo">Відгуки ⭐</div>
+            <a href="index.html" style="text-decoration:none; color:var(--accent); font-weight:700;">← В магазин</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <h1 style="margin-top:20px;">Що кажуть замовники</h1>
+        <div id="reviews-container" class="reviews-grid"></div>
+    </main>
+
+    <div id="review-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeReview()">&times;</span>
+            <div id="modal-stars" class="review-stars"></div>
+            <h2 id="modal-author"></h2>
+            <p id="modal-full-text" style="line-height:1.6; color:#444;"></p>
+            <div id="modal-date" class="review-date"></div>
+        </div>
+    </div>
+
+    <div class="mobile-nav">
+        <a href="index.html" class="nav-btn-link">🏠 Головна</a>
+        <a href="reviews.html" class="nav-btn-link active">⭐ Відгуки</a>
+        <a href="cart.html" class="nav-btn-link">🛒 Кошик</a>
+    </div>
+
+    <script src="reviews-data.js"></script>
+</body>
+</html>

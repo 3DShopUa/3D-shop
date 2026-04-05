@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Галерея робіт | 3D Shop UA</title>
+    <link rel="stylesheet" href="../style.css"> 
+    <style>
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 20px 0;
+        }
+        .gallery-item {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .gallery-item:hover {
+            transform: scale(1.03);
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery-info {
+            padding: 15px;
+            text-align: center;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 25px;
+            background: var(--dark);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <h1 class="logo">Галерея моїх робіт</h1>
+            <p>Найкращі моделі, надруковані на Neptune 4 Pro</p>
+            <a href="../index.html" class="back-btn">⬅ На головну (в магазин)</a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="gallery-grid">
+            
+           
+
+            <div class="gallery-item">
+                <img src="../zorbel2.jpg" alt="Зорбел">
+                <div class="gallery-info">
+                    <h3>Zorbel </h3>
+                    <p>Пластик: abs.Антистрес з кейсом .</p>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="../gecon2.jpg" alt="Гекон">
+                <div class="gallery-info">
+                    <h3>Гекон-блок</h3>
+                    <p> друк. Ідеальна рухливість.</p>
+                </div>
+            </div>
+
+            <div class="gallery-item">
+                <img src="../creeper.jpg" alt="Кріпер">
+                <div class="gallery-info">
+                    <h3>Minecraft Creeper</h3>
+                    <p>брелок по фанатській грі.</p>
+                </div>
+            </div>
+
+            </div>
+    </main>
+
+    <footer style="text-align: center; padding: 40px; color: #888;">
+        <p>© 2026 3DPrintCraft. Створено Нікітою.</p>
+    </footer>
+
+</body>
+</html>

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Оформлення замовлення | 3D Shop UA</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .cart-container { padding: 20px 0; min-height: 80vh; }
+        .cart-item-card {
+            background: white; padding: 15px; border-radius: 20px;
+            margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .cart-item-main { display: flex; align-items: center; gap: 15px; }
+        .cart-img-min { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
+        
+        .checkout-section {
+            background: white; padding: 25px; border-radius: 30px;
+            margin-top: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .order-form { display: flex; flex-direction: column; gap: 12px; }
+        .order-form label { font-size: 13px; font-weight: 700; color: #666; margin-left: 5px; }
+        .order-form input {
+            width: 100%; padding: 14px; border-radius: 15px; border: 1px solid #eee;
+            background: #f9f9f9; font-size: 16px; outline: none; transition: 0.3s;
+        }
+        .order-form input:focus { border-color: var(--accent); background: white; }
+
+        .privacy-note {
+            margin-top: 15px; font-size: 11px; color: #999; text-align: center; line-height: 1.4;
+        }
+        .total-row { display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; margin-bottom: 20px; border-bottom: 1px dashed #ddd; padding-bottom: 15px; }
+        
+        .empty-cart { text-align: center; padding: 80px 20px; }
+        .qty-btn { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #ddd; background: white; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container">
+            <div class="logo">Оформлення 📦</div>
+            <a href="index.html" style="text-decoration:none; color:var(--accent); font-weight:700;">← В магазин</a>
+        </div>
+    </header>
+
+    <div class="container cart-container">
+        <div id="cart-items-list"></div>
+
+        <div id="checkout-block" style="display: none;">
+            <div class="checkout-section">
+                <div class="total-row">
+                    <span>До сплати:</span>
+                    <span id="checkout-total">0 ₴</span>
+                </div>
+                
+                <div class="order-form">
+                    <div>
+                        <label>Ваше ім'я та Прізвище</label>
+                        <input type="text" id="u-name" placeholder="Іван Іванов" oninput="saveUserData()">
+                    </div>
+                    <div>
+                        <label>Телефон</label>
+                        <input type="tel" id="u-phone" placeholder="+380..." oninput="saveUserData()">
+                    </div>
+                    <div>
+                        <label>Місто</label>
+                        <input type="text" id="u-city" placeholder="Київ, Львів..." oninput="saveUserData()">
+                    </div>
+                    <div>
+                        <label>Відділення Нової Пошти</label>
+                        <input type="text" id="u-post" placeholder="№1, вул. Центральна..." oninput="saveUserData()">
+                    </div>
+                    
+                    <button class="main-btn" id="send-order-btn" onclick="sendOrder()">Замовити через Telegram</button>
+                </div>
+
+                <p class="privacy-note">
+                    🔒 Ваші дані захищені. Ми використовуємо їх виключно для оформлення ТТН та доставки вашого замовлення. Ми не передаємо інформацію третім особам та не використовуємо її в рекламних цілях без вашої згоди.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData(); // Завантажуємо збережені дані
+            updateCartPage();
+        });
+
+        // 1. ЗАПАМ'ЯТОВУВАННЯ ДАНИХ (LocalStorage)
+        function saveUserData() {
+            const userData = {
+                name: document.getElementById('u-name').value,
+                phone: document.getElementById('u-phone').value,
+                city: document.getElementById('u-city').value,
+                post: document.getElementById('u-post').value
+            };
+            localStorage.setItem('user_shipping_info', JSON.stringify(userData));
+        }
+
+        function loadUserData() {
+            const saved = localStorage.getItem('user_shipping_info');
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById('u-name').value = data.name || '';
+                document.getElementById('u-phone').value = data.phone || '';
+                document.getElementById('u-city').value = data.city || '';
+                document.getElementById('u-post').value = data.post || '';
+            }
+        }
+
+        // 2. ВІДОБРАЖЕННЯ ТОВАРІВ
+        function updateCartPage() {
+            const list = document.getElementById('cart-items-list');
+            const checkoutBlock = document.getElementById('checkout-block');
+            const totalLabel = document.getElementById('checkout-total');
+            
+            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+            let items = Object.values(cartData);
+            
+            if (items.length === 0) {
+                list.innerHTML = `<div class="empty-cart"><h2>Кошик порожній 🛒</h2><br><a href="index.html" class="main-btn" style="text-decoration:none;">Повернутись</a></div>`;
+                checkoutBlock.style.display = 'none';
+                return;
+            }
+
+            checkoutBlock.style.display = 'block';
+            list.innerHTML = '';
+            let total = 0;
+
+            items.forEach(item => {
+                total += item.price * item.qty;
+                const div = document.createElement('div');
+                div.className = 'cart-item-card';
+                div.innerHTML = `
+                    <div class="cart-item-main">
+                        <img src="${item.imgs[0]}" class="cart-img-min">
+                        <div style="flex:1">
+                            <div style="font-weight:700">${item.title}</div>
+                            <div style="color:#888; font-size:14px">${item.price} ₴</div>
+                        </div>
+                        <button onclick="removeItem(${item.id})" style="border:none; background:none; font-size:18px; cursor:pointer;">🗑️</button>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid #f5f5f5;">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                            <b>${item.qty}</b>
+                            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                        </div>
+                        <div style="font-weight:800; color:var(--accent)">${item.price * item.qty} ₴</div>
+                    </div>
+                `;
+                list.appendChild(div);
+            });
+            totalLabel.innerText = `${total} ₴`;
+        }
+
+        window.changeQty = (id, delta) => {
+            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+            if (cartData[id]) {
+                cartData[id].qty += delta;
+                if (cartData[id].qty <= 0) delete cartData[id];
+                localStorage.setItem('shop_cart', JSON.stringify(cartData));
+                updateCartPage();
+            }
+        };
+
+        window.removeItem = (id) => {
+            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+            delete cartData[id];
+            localStorage.setItem('shop_cart', JSON.stringify(cartData));
+            updateCartPage();
+        };
+
+        // 3. ВІДПРАВКА В TELEGRAM
+     async function sendOrder() {
+    const name = document.getElementById('u-name').value;
+    const phone = document.getElementById('u-phone').value;
+    const city = document.getElementById('u-city').value;
+    const post = document.getElementById('u-post').value;
+    const btn = document.getElementById('send-order-btn');
+
+    // Перевірка полів
+    if (!name || !phone || !city || !post) {
+        btn.innerText = "Заповніть всі дані! ⚠️";
+        btn.style.background = "#e74c3c"; // Червоний, якщо забули заповнити
+        setTimeout(() => {
+            btn.innerText = "Замовити через Telegram";
+            btn.style.background = ""; 
+        }, 2000);
+        return;
+    }
+
+    // Готуємо текст для Telegram
+    let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+    let items = Object.values(cartData);
+    let text = `📦 НОВЕ ЗАМОВЛЕННЯ\n\n👤 ${name}\n📞 ${phone}\n📍 ${city}\n🏢 ${post}\n\n🛒 Товари:\n`;
+    let total = 0;
+    items.forEach(i => {
+        text += `• ${i.title} x${i.qty} (${i.price * i.qty} ₴)\n`;
+        total += i.price * i.qty;
+    });
+    text += `\n💰 РАЗОМ: ${total} ₴`;
+
+    const token = '8756666594:AAHpx1RL_NXlKxSzWCBP23HjB8wLJVk0gRw';
+    const chat_id = '5796612318';
+
+    // Змінюємо вигляд кнопки перед відправкою
+    btn.disabled = true;
+    btn.innerText = "Відправляємо...";
+
+    try {
+        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id, text })
+        });
+
+        if (res.ok) {
+            // ЗАМІСТЬ ALERT РОБИМО КРАСИВУ КНОПКУ
+            btn.classList.add('success'); 
+            btn.innerText = "Успішно надіслано! ✅";
+            
+            // Чистимо кошик
+            localStorage.removeItem('shop_cart');
+
+            // Чекаємо 2 секунди, щоб людина побачила успіх, і переходимо на головну
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 2000);
+
+        } else {
+            throw new Error('Помилка API');
+        }
+    } catch (e) {
+        btn.disabled = false;
+        btn.innerText = "Помилка! Спробуйте ще раз";
+        btn.style.background = "#e74c3c";
+    }
+}
+    </script>
+</body>
+</html>
