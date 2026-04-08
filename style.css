@@ -133,7 +133,7 @@ header { background: white; padding: 20px 0; border-bottom: 1px solid #eee; posi
 
 /* Ефект при натисканні (стискання) */
 .main-btn:active {
-    transform: scale(0.96);
+    transform: scale(0.69);
 }
 
 /* Стиль для кнопок "+" та "-" у кошику */
