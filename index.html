@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Shop UA | Магазин</title>
+	<link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,11 +21,10 @@
                 <input type="text" id="searchInput" placeholder="Пошук моделей...">
             </div>
             <div class="categories">
-				<button class="cat-btn" data-cat="sale">🔥 Акції</button>
                 <button class="cat-btn active" data-cat="all">Всі</button>
                 <button class="cat-btn" data-cat="flexi">🦎 Флексі</button>
                 <button class="cat-btn" data-cat="toys">🧸 Іграшки</button>
-                <button class="cat-btn" data-cat="figet">🕹 фіджет</button>
+                <button class="cat-btn" data-cat="sale">🔥 Акції</button>
             </div>
         </div>
     </header>
@@ -44,14 +44,16 @@
                 </div>
             </div>
             <div class="product-info">
-                <h2 id="p-title"></h2>
-                <p id="p-desc"></p>
-                <div id="p-price-cont" class="modal-price"></div>
-                <button class="main-btn" id="add-to-cart-action">Додати у кошик</button>
-            </div>
-        </div>
-    </div>
+    <h2 id="p-title"></h2>
+    <p id="p-desc"></p>
+    <div id="p-price-cont" class="modal-price"></div>
 
+    
+
+    <button class="main-btn" id="add-to-cart-action">Додати у кошик</button>
+</div>
+</div>
+</div>
     <div class="mobile-nav">
     <a href="index.html" class="nav-btn-link" onclick="handleHomeClick(event)">
         🏠 Головна
@@ -60,8 +62,187 @@
     <a href="cart.html" class="nav-btn-link">
         🛒 Кошик <span id="cart-count">0</span>
     </a>
+	<a href="track.html" class="nav-btn-link">📦 Статус</a>
+	
+
+    
+
+    
+   
+
+
 </div>
 
+
+
+
+
+
     <script src="script.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
+<script>
+  function checkMyOrder() {
+    const phone = document.getElementById('check-phone').value.replace(/\D/g, '');
+    const display = document.getElementById('result-display');
+    
+    db.ref('orders/' + phone).once('value').then((snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        display.innerHTML = `Поточний статус: <b>${data.status}</b><br><small>Оновлено: ${data.lastUpdate}</small>`;
+      } else {
+        display.innerText = "Замовлення не знайдено ❌";
+      }
+    });
+  }
+  // Твій Firebase Config (як в адмінці)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAban86otzMqDuk_XwnqADDNPHICU9tFFs",
+    authDomain: "d-shop-status.firebaseapp.com",
+    projectId: "d-shop-status",
+    storageBucket: "d-shop-status.firebasestorage.app",
+    messagingSenderId: "286708501499",
+    appId: "1:286708501499:web:eb82c5cf7f7f92746ed95e",
+    databaseURL: "https://d-shop-status-default-rtdb.firebaseio.com" 
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function checkMyOrder() {
+    const phone = document.getElementById('check-phone').value.replace(/\D/g, '');
+    const resultBox = document.getElementById('status-result');
+    const statusText = document.getElementById('status-text');
+    const statusTime = document.getElementById('status-time');
+
+    if (phone.length < 10) {
+        alert("Введіть повний номер телефону");
+        return;
+    }
+
+    db.ref('orders/' + phone).once('value').then((snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            resultBox.style.display = 'block';
+            statusText.innerText = data.status;
+            statusTime.innerText = "Останнє оновлення: " + data.time;
+        } else {
+            alert("Замовлення не знайдено. Перевірте номер або напишіть нам!");
+            resultBox.style.display = 'none';
+        }
+    });
+  }
+  function sendOrderAndRedirect() {
+    const phoneField = document.getElementById('phone-input');
+    if (!phoneField) {
+        alert("Помилка: не знайдено поле вводу з id='phone-input'");
+        return;
+    }
+
+    const phone = phoneField.value.replace(/\D/g, '');
+
+    if (phone.length >= 10) {
+        // 1. Зберігаємо номер в пам'ять (localStorage)
+        localStorage.setItem('tracked_phone', phone);
+        
+        // 2. Створюємо запис в Firebase (щоб точно був статус "В черзі")
+        db.ref('orders/' + phone).update({
+            status: "⏳ В черзі",
+            lastUpdate: new Date().toLocaleString()
+        }).then(() => {
+            // 3. Тільки після успішного запису переходимо
+            window.location.href = 'track.html';
+        }).catch(err => {
+            console.error(err);
+            // Навіть якщо помилка запису, спробуємо просто перейти
+            window.location.href = 'track.html';
+        });
+    } else {
+        alert("Введіть коректний номер!");
+    }
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
+
+<script>
+  // Твоя конфігурація Firebase (така ж як в адмінці)
+  const firebaseConfig = {
+    apiKey: "AIzaSyAban86otzMqDuk_XwnqADDNPHICU9tFFs",
+    authDomain: "d-shop-status.firebaseapp.com",
+    projectId: "d-shop-status",
+    storageBucket: "d-shop-status.firebasestorage.app",
+    messagingSenderId: "286708501499",
+    appId: "1:286708501499:web:eb82c5cf7f7f92746ed95e",
+    databaseURL: "https://d-shop-status-default-rtdb.europe-west1.firebasedatabase.app/"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  function completeOrder() {
+      // 1. Беремо номер телефону
+      const phoneInput = document.getElementById('phone-input');
+      const phone = phoneInput.value.replace(/\D/g, '');
+
+      if (phone.length < 10) {
+          alert("Будь ласка, введіть повний номер телефону!");
+          return;
+      }
+
+      // 2. Визначаємо, що замовив клієнт. 
+      // Якщо в тебе один товар, можна просто написати назву.
+      // Якщо декілька — тут треба брати назву з твого масиву кошика.
+      const itemName = "Гекон-антистрес"; 
+      const itemImg = "gekon.jpg"; // Назва картинки, яка має лежать у папці img/
+
+      // 3. Записуємо в Firebase
+      db.ref('orders/' + phone).set({
+          status: "⏳ В черзі",
+          item: itemName,
+          img: itemImg,
+          time: new Date().toLocaleString()
+      }).then(() => {
+          // 4. ПЕРЕМОГА: Зберігаємо номер у пам'ять браузера
+          localStorage.setItem('tracked_phone', phone);
+          
+          // 5. Перекидаємо на сторінку треку
+          window.location.href = 'track.html';
+      }).catch((error) => {
+          alert("Помилка при замовленні: " + error.message);
+      });
+  }
+</script>
+<script>
+function completeOrder() {
+    // 1. Беремо номер телефону
+    const phone = document.getElementById('phone-input').value.replace(/\D/g, '');
+    
+    // 2. Беремо назву товару прямо з заголовка модального вікна
+    const itemName = document.getElementById('p-title').innerText;
+    
+    // 3. Беремо картинку (якщо в тебе в слайдері перша картинка основна)
+    // Якщо картинки складні, поки залишимо пустим або напишемо заглушку
+    const itemImg = "product.jpg"; 
+
+    if (phone.length < 10) {
+        alert("Будь ласка, введіть коректний номер телефону!");
+        return;
+    }
+
+    // Записуємо в базу (databaseURL має бути твоя!)
+    db.ref('orders/' + phone).set({
+        status: "⏳ В черзі",
+        item: itemName,
+        img: itemImg,
+        time: new Date().toLocaleString()
+    }).then(() => {
+        // Зберігаємо в пам'ять і переходимо на трек
+        localStorage.setItem('tracked_phone', phone);
+        window.location.href = 'track.html';
+    }).catch(err => alert("Помилка: " + err.message));
+}
+</script>
 </body>
 </html>

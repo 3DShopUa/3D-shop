@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оформлення замовлення | 3D Shop UA</title>
+	<link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="style.css">
     <style>
         .cart-container { padding: 20px 0; min-height: 80vh; }
@@ -55,26 +56,34 @@
                     <span id="checkout-total">0 ₴</span>
                 </div>
                 
-                <div class="order-form">
-                    <div>
-                        <label>Ваше ім'я та Прізвище</label>
-                        <input type="text" id="u-name" placeholder="Іван Іванов" oninput="saveUserData()">
-                    </div>
-                    <div>
-                        <label>Телефон</label>
-                        <input type="tel" id="u-phone" placeholder="+380..." oninput="saveUserData()">
-                    </div>
-                    <div>
-                        <label>Місто</label>
-                        <input type="text" id="u-city" placeholder="Київ, Львів..." oninput="saveUserData()">
-                    </div>
-                    <div>
-                        <label>Відділення Нової Пошти</label>
-                        <input type="text" id="u-post" placeholder="№1, вул. Центральна..." oninput="saveUserData()">
-                    </div>
-                    
-                    <button class="main-btn" id="send-order-btn" onclick="sendOrder()">Замовити через Telegram</button>
-                </div>
+              <div class="order-form">
+    <div class="input-group">
+        <label>Ваше ім'я та Прізвище</label>
+        <input type="text" id="u-name" placeholder="Іван Іванов" oninput="saveUserData()">
+        <span class="error-msg">Введіть повне ім'я</span>
+    </div>
+
+    <div class="input-group">
+        <label>Телефон</label>
+        <input type="tel" id="u-phone" placeholder="+380 (__) ___ __ __" oninput="saveUserData()">
+        <span class="error-msg">Введіть коректний номер</span>
+    </div>
+
+    <div class="input-group">
+        <label>Місто</label>
+        <input type="text" id="u-city" placeholder="Київ, Львів..." oninput="saveUserData()">
+        <span class="error-msg">Вкажіть місто доставки</span>
+    </div>
+
+    <div class="input-group">
+        <label>Відділення Нової Пошти</label>
+        <input type="text" id="u-post" placeholder="№1, вул. Центральна..." oninput="saveUserData()">
+        <span class="error-msg">Вкажіть номер відділення</span>
+    </div>
+    
+    <button class="main-btn" id="send-order-btn" onclick="sendOrder()">Замовити через Telegram</button>
+</div>
+
 
                 <p class="privacy-note">
                     🔒 Ваші дані захищені. Ми використовуємо їх виключно для оформлення ТТН та доставки вашого замовлення. Ми не передаємо інформацію третім особам та не використовуємо її в рекламних цілях без вашої згоди.
@@ -83,164 +92,190 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            loadUserData(); // Завантажуємо збережені дані
-            updateCartPage();
-        });
+   <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>
 
-        // 1. ЗАПАМ'ЯТОВУВАННЯ ДАНИХ (LocalStorage)
-        function saveUserData() {
-            const userData = {
-                name: document.getElementById('u-name').value,
-                phone: document.getElementById('u-phone').value,
-                city: document.getElementById('u-city').value,
-                post: document.getElementById('u-post').value
-            };
-            localStorage.setItem('user_shipping_info', JSON.stringify(userData));
-        }
+<script>
+    // 1. КОНФІГУРАЦІЯ FIREBASE
+    const firebaseConfig = {
+        apiKey: "AIzaSyAban86otzMqDuk_XwnqADDNPHICU9tFFs",
+        authDomain: "d-shop-status.firebaseapp.com",
+        projectId: "d-shop-status",
+        databaseURL: "https://d-shop-status-default-rtdb.europe-west1.firebasedatabase.app/",
+        appId: "1:286708501499:web:eb82c5cf7f7f92746ed95e"
+    };
 
-        function loadUserData() {
-            const saved = localStorage.getItem('user_shipping_info');
-            if (saved) {
-                const data = JSON.parse(saved);
-                document.getElementById('u-name').value = data.name || '';
-                document.getElementById('u-phone').value = data.phone || '';
-                document.getElementById('u-city').value = data.city || '';
-                document.getElementById('u-post').value = data.post || '';
-            }
-        }
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.database();
 
-        // 2. ВІДОБРАЖЕННЯ ТОВАРІВ
-        function updateCartPage() {
-            const list = document.getElementById('cart-items-list');
-            const checkoutBlock = document.getElementById('checkout-block');
-            const totalLabel = document.getElementById('checkout-total');
-            
-            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
-            let items = Object.values(cartData);
-            
-            if (items.length === 0) {
-                list.innerHTML = `<div class="empty-cart"><h2>Кошик порожній 🛒</h2><br><a href="index.html" class="main-btn" style="text-decoration:none;">Повернутись</a></div>`;
-                checkoutBlock.style.display = 'none';
-                return;
-            }
-
-            checkoutBlock.style.display = 'block';
-            list.innerHTML = '';
-            let total = 0;
-
-            items.forEach(item => {
-                total += item.price * item.qty;
-                const div = document.createElement('div');
-                div.className = 'cart-item-card';
-                div.innerHTML = `
-                    <div class="cart-item-main">
-                        <img src="${item.imgs[0]}" class="cart-img-min">
-                        <div style="flex:1">
-                            <div style="font-weight:700">${item.title}</div>
-                            <div style="color:#888; font-size:14px">${item.price} ₴</div>
-                        </div>
-                        <button onclick="removeItem(${item.id})" style="border:none; background:none; font-size:18px; cursor:pointer;">🗑️</button>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid #f5f5f5;">
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
-                            <b>${item.qty}</b>
-                            <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
-                        </div>
-                        <div style="font-weight:800; color:var(--accent)">${item.price * item.qty} ₴</div>
-                    </div>
-                `;
-                list.appendChild(div);
+    // 2. ЗАПУСК ПРИ ЗАВАНТАЖЕННІ
+    document.addEventListener('DOMContentLoaded', () => {
+        loadUserData();
+        updateCartPage();
+        
+        // Маска для телефону
+        const phoneInput = document.getElementById('u-phone');
+        if (phoneInput) {
+            phoneInput.addEventListener('input', (e) => {
+                let x = e.target.value.replace(/\D/g, '').match(/(\d{0,3})(\d{0,2})(\d{0,3})(\d{0,2})(\d{0,2})/);
+                if (!x[2]) e.target.value = x[1] ? '+' + x[1] : '';
+                else e.target.value = `+${x[1]} (${x[2]}) ` + (x[3] ? x[3] : '') + (x[4] ? '-' + x[4] : '') + (x[5] ? '-' + x[5] : '');
             });
-            totalLabel.innerText = `${total} ₴`;
         }
 
-        window.changeQty = (id, delta) => {
-            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
-            if (cartData[id]) {
-                cartData[id].qty += delta;
-                if (cartData[id].qty <= 0) delete cartData[id];
-                localStorage.setItem('shop_cart', JSON.stringify(cartData));
-                updateCartPage();
-            }
-        };
+        // Заборона цифр в імені
+        const nameInput = document.getElementById('u-name');
+        if (nameInput) {
+            nameInput.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[0-9!@#$%^&*()_+=[\]{};:"\\|,.<>/?]/g, '');
+            });
+        }
+    });
 
-        window.removeItem = (id) => {
-            let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
-            delete cartData[id];
+    // 3. ФУНКЦІЇ КОШИКА ТА ДАНИХ
+    function loadUserData() {
+        const saved = localStorage.getItem('user_shipping_info');
+        if (saved) {
+            const data = JSON.parse(saved);
+            if(document.getElementById('u-name')) document.getElementById('u-name').value = data.name || '';
+            if(document.getElementById('u-phone')) document.getElementById('u-phone').value = data.phone || '';
+            if(document.getElementById('u-city')) document.getElementById('u-city').value = data.city || '';
+            if(document.getElementById('u-post')) document.getElementById('u-post').value = data.post || '';
+        }
+    }
+
+    function updateCartPage() {
+        const list = document.getElementById('cart-items-list');
+        const checkoutBlock = document.getElementById('checkout-block');
+        const totalLabel = document.getElementById('checkout-total');
+        
+        let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+        let items = Object.values(cartData);
+        
+        if (items.length === 0) {
+            list.innerHTML = `<div class="empty-cart"><h2>Кошик порожній 🛒</h2><br><a href="index.html" class="main-btn" style="text-decoration:none;">Повернутись</a></div>`;
+            if(checkoutBlock) checkoutBlock.style.display = 'none';
+            return;
+        }
+
+        if(checkoutBlock) checkoutBlock.style.display = 'block';
+        list.innerHTML = '';
+        let total = 0;
+
+        items.forEach(item => {
+            total += item.price * item.qty;
+            const div = document.createElement('div');
+            div.className = 'cart-item-card';
+            div.innerHTML = `
+                <div class="cart-item-main">
+                    <img src="${item.imgs ? item.imgs[0] : ''}" class="cart-img-min">
+                    <div style="flex:1">
+                        <div style="font-weight:700">${item.title}</div>
+                        <div style="color:#888; font-size:14px">${item.price} ₴</div>
+                    </div>
+                    <button onclick="removeItem(${item.id})" style="border:none; background:none; font-size:18px; cursor:pointer;">🗑️</button>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top:1px solid #eee;">
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                        <b>${item.qty}</b>
+                        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                    </div>
+                    <div style="font-weight:800; color:#ff9500">${item.price * item.qty} ₴</div>
+                </div>`;
+            list.appendChild(div);
+        });
+        if(totalLabel) totalLabel.innerText = `${total} ₴`;
+    }
+
+    window.changeQty = (id, delta) => {
+        let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+        if (cartData[id]) {
+            cartData[id].qty += delta;
+            if (cartData[id].qty <= 0) delete cartData[id];
             localStorage.setItem('shop_cart', JSON.stringify(cartData));
             updateCartPage();
-        };
-
-        // 3. ВІДПРАВКА В TELEGRAM
-     async function sendOrder() {
-    const name = document.getElementById('u-name').value;
-    const phone = document.getElementById('u-phone').value;
-    const city = document.getElementById('u-city').value;
-    const post = document.getElementById('u-post').value;
-    const btn = document.getElementById('send-order-btn');
-
-    // Перевірка полів
-    if (!name || !phone || !city || !post) {
-        btn.innerText = "Заповніть всі дані! ⚠️";
-        btn.style.background = "#e74c3c"; // Червоний, якщо забули заповнити
-        setTimeout(() => {
-            btn.innerText = "Замовити через Telegram";
-            btn.style.background = ""; 
-        }, 2000);
-        return;
-    }
-
-    // Готуємо текст для Telegram
-    let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
-    let items = Object.values(cartData);
-    let text = `📦 НОВЕ ЗАМОВЛЕННЯ\n\n👤 ${name}\n📞 ${phone}\n📍 ${city}\n🏢 ${post}\n\n🛒 Товари:\n`;
-    let total = 0;
-    items.forEach(i => {
-        text += `• ${i.title} x${i.qty} (${i.price * i.qty} ₴)\n`;
-        total += i.price * i.qty;
-    });
-    text += `\n💰 РАЗОМ: ${total} ₴`;
-
-    const token = '8756666594:AAHpx1RL_NXlKxSzWCBP23HjB8wLJVk0gRw';
-    const chat_id = '5796612318';
-
-    // Змінюємо вигляд кнопки перед відправкою
-    btn.disabled = true;
-    btn.innerText = "Відправляємо...";
-
-    try {
-        const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ chat_id, text })
-        });
-
-        if (res.ok) {
-            // ЗАМІСТЬ ALERT РОБИМО КРАСИВУ КНОПКУ
-            btn.classList.add('success'); 
-            btn.innerText = "Успішно надіслано! ✅";
-            
-            // Чистимо кошик
-            localStorage.removeItem('shop_cart');
-
-            // Чекаємо 2 секунди, щоб людина побачила успіх, і переходимо на головну
-            setTimeout(() => {
-                window.location.href = 'index.html';
-            }, 2000);
-
-        } else {
-            throw new Error('Помилка API');
         }
-    } catch (e) {
-        btn.disabled = false;
-        btn.innerText = "Помилка! Спробуйте ще раз";
-        btn.style.background = "#e74c3c";
+    };
+
+    window.removeItem = (id) => {
+        let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+        delete cartData[id];
+        localStorage.setItem('shop_cart', JSON.stringify(cartData));
+        updateCartPage();
+    };
+
+    // 4. ГОЛОВНА ФУНКЦІЯ ВІДПРАВКИ
+    async function sendOrder() {
+        const btn = document.getElementById('send-order-btn');
+        const name = document.getElementById('u-name').value;
+        const phoneRaw = document.getElementById('u-phone').value;
+        const city = document.getElementById('u-city').value;
+        const post = document.getElementById('u-post').value;
+        const userPhone = phoneRaw.replace(/\D/g, '');
+
+        if (!name || userPhone.length < 10) {
+            alert("Заповни ім'я та правильний номер!");
+            return;
+        }
+
+        let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
+        let items = Object.values(cartData);
+        if (items.length === 0) return;
+
+        btn.disabled = true;
+        btn.innerText = "Відправка...";
+
+        const itemNames = items.map(i => `${i.title} (x${i.qty})`).join(", ");
+        const totalSum = items.reduce((sum, i) => sum + (i.price * i.qty), 0);
+
+        try {
+            // А. Запис у Firebase (Статус В черзі)
+            await db.ref('orders/' + userPhone).set({
+                customer: name,
+                item: itemNames,
+                status: "⏳ В черзі",
+                time: new Date().toLocaleString()
+            });
+
+            // Б. Відправка в Telegram
+            const token = '8756666594:AAHpx1RL_NXlKxSzWCBP23HjB8wLJVk0gRw';
+            const chat_id = '5796612318';
+            const text = `📦 ЗАМОВЛЕННЯ\n👤 ${name}\n📞 ${phoneRaw}\n📍 ${city}\n🏢 ${post}\n🛒 ${itemNames}\n💰 РАЗОМ: ${totalSum} ₴`;
+
+            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id, text })
+            });
+
+            // В. Успіх: Кнопка стає зеленою
+            btn.style.background = "#28a745";
+            btn.style.borderColor = "#28a745";
+            btn.innerText = "Успішно! ✅";
+
+            // Г. Логіка сповіщення (червона одиничка)
+            localStorage.setItem('order_notification', '1');
+            localStorage.setItem('tracked_phone', userPhone);
+            localStorage.removeItem('shop_cart');
+            
+            // Зберігаємо дані для автозаповнення на майбутнє
+            localStorage.setItem('user_shipping_info', JSON.stringify({name, phone: phoneRaw, city, post}));
+
+            // Д. Перехід на головну через 1.5 сек
+            setTimeout(() => { 
+                window.location.href = 'index.html'; 
+            }, 1500);
+
+        } catch (e) {
+            console.error(e);
+            alert("Помилка! Перевір інтернет або правила Firebase.");
+            btn.disabled = false;
+            btn.innerText = "Замовити ще раз";
+        }
     }
-}
-    </script>
+</script>
 </body>
 </html>

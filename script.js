@@ -13,11 +13,12 @@ const products = [
         cat: ['flexi', 'sale'], desc: "Маленький рухомий гекон.", 
         imgs: ['gecon1.jpg', 'gecon2.jpg'] 
     },
-    { 
-        id: 3, title: "Кріпер Minecraft", 
-        currentPrice: 25, oldPrice:50, 
-        cat: ['toys', 'sale'], desc: "Фігурка Кріпера для фанатів гри.", 
-        imgs: ['creeper.jpg'] 
+   
+	{ 
+        id: 3, title: "копійкі-антистрес", 
+        currentPrice: 25, oldPrice: 100, 
+        cat: ['figet', 'sale'], desc: "Маленькі рухомі фіджет копійкі.", 
+        imgs: ['coin1.jpg', 'coin2.jpg'] 
     }
 ];
 
@@ -158,17 +159,36 @@ const addToCartBtn = document.getElementById('add-to-cart-action');
 if (addToCartBtn) {
     addToCartBtn.onclick = () => {
         const id = currentProduct.id;
-        
+
         // Додаємо товар у об'єкт кошика
         if (cart[id]) {
             cart[id].qty++;
         } else {
-            cart[id] = { 
-                ...currentProduct, 
-                qty: 1, 
-                price: currentProduct.currentPrice 
+            cart[id] = {
+                ...currentProduct,
+                qty: 1,
+                price: currentProduct.currentPrice
             };
+        
+
+        // Оновлюємо інтерфейс та пам'ять
+        updateCartUI();
+
+        // --- ОСЬ ТУТ ЦЕЙ НОВИЙ ШМАТОЧОК (ПІСЛЯ updateCartUI) ---
+        const cartIcon = document.querySelector('.nav-btn-link[href="cart.html"]');
+        if (cartIcon) {
+            cartIcon.classList.add('cart-bounce-active');
+            setTimeout(() => {
+                cartIcon.classList.remove('cart-bounce-active');
+            }, 400);
         }
+        // ------------------------------------------------------
+
+        // ЕФЕКТ ГАЛОЧКИ (твій старий код, що йде далі...)
+        const originalText = addToCartBtn.innerHTML;
+        // ... і так далі
+    };
+
 
         // Оновлюємо інтерфейс та пам'ять
         updateCartUI();
