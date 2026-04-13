@@ -1,6 +1,5 @@
 // 1. БАЗА ТОВАРІВ
 const products = [
-    
     { 
         id: 1, title: "Зорбел (Zorbel)", 
         currentPrice: 30, oldPrice: 150, 
@@ -13,8 +12,7 @@ const products = [
         cat: ['flexi', 'sale'], desc: "Маленький рухомий гекон.", 
         imgs: ['gecon1.jpg', 'gecon2.jpg'] 
     },
-   
-	{ 
+    { 
         id: 3, title: "копійкі-антистрес", 
         currentPrice: 25, oldPrice: 100, 
         cat: ['figet', 'sale'], desc: "Маленькі рухомі фіджет копійкі.", 
@@ -26,7 +24,7 @@ let cart = JSON.parse(localStorage.getItem('shop_cart')) || {};
 let currentProduct = null;
 let currentSlide = 0;
 
-// 2. ФУНКЦІЯ МАЛЮВАННЯ ТОВАРІВ
+// 2. МАЛЮВАННЯ ТОВАРІВ НА ГОЛОВНІЙ
 function renderProducts(filter = 'all') {
     const grid = document.getElementById('grid');
     if (!grid) return;
@@ -40,15 +38,13 @@ function renderProducts(filter = 'all') {
         
         const card = document.createElement('div');
         card.className = 'card';
-        card.onclick = () => openProduct(p.id); // Клік по всій картці відкриває модалку
+        card.onclick = () => openProduct(p.id); 
 
         card.innerHTML = `
             ${hasSale ? `<div class="sale-badge">-${discount}%</div>` : ''}
-            
             <div class="card-image-static">
                 <img src="${p.imgs[0]}" alt="${p.title}">
             </div>
-
             <div class="card-info">
                 <h3>${p.title}</h3>
                 <div class="price-row">
@@ -61,40 +57,25 @@ function renderProducts(filter = 'all') {
     });
 }
 
-// 3. ГОРТАННЯ ФОТО (БЕЗ ВІДКРИТТЯ МОДАЛКИ)
-window.moveCardSlide = (id, delta) => {
-    const p = products.find(i => i.id === id);
-    const slidesCont = document.getElementById(`slides-${id}`);
-    const card = slidesCont.closest('.card');
-    let current = parseInt(card.dataset.currentSlide) || 0;
-    
-    current = (current + delta + p.imgs.length) % p.imgs.length;
-    card.dataset.currentSlide = current;
-    slidesCont.style.transform = `translateX(-${current * 100}%)`;
-};
-
-// 4. ВІДКРИТТЯ МОДАЛКИ (ВИПРАВЛЕНО)
+// 3. МОДАЛЬНЕ ВІКНО ТА СЛАЙДЕР
 window.openProduct = (id) => {
     currentProduct = products.find(p => p.id === id);
     if (!currentProduct) return;
 
-    // Заповнюємо дані в модалці
     document.getElementById('p-title').innerText = currentProduct.title;
     document.getElementById('p-desc').innerText = currentProduct.desc;
     document.getElementById('p-price-cont').innerText = `${currentProduct.currentPrice} ₴`;
     
-    // Слайдер у модалці
     const modalSlides = document.getElementById('product-slides');
     if (modalSlides) {
-        modalSlides.innerHTML = currentProduct.imgs.map(img => `<img src="${img}">`).join('');
+        modalSlides.innerHTML = currentProduct.imgs.map(img => `<img src="${img}" style="width:100%; flex-shrink:0;">`).join('');
     }
     
     currentSlide = 0;
     updateModalSlider();
     
-    // Показуємо модалку
     const modal = document.getElementById('product-modal');
-    if (modal) modal.classList.add('show');
+    if (modal) modal.classList.add('show'); // Переконайся, що в CSS є .modal.show { display: flex; }
 };
 
 window.closeProduct = () => {
@@ -102,8 +83,8 @@ window.closeProduct = () => {
     if (modal) modal.classList.remove('show');
 };
 
-// Слайдер всередині модалки
 window.moveSlide = (n) => {
+    if (!currentProduct) return;
     const total = currentProduct.imgs.length;
     currentSlide = (currentSlide + n + total) % total;
     updateModalSlider();
@@ -111,101 +92,92 @@ window.moveSlide = (n) => {
 
 function updateModalSlider() {
     const s = document.getElementById('product-slides');
-    if (s) s.style.transform = `translateX(-${currentSlide * 100}%)`;
-}
-
-// 5. КОШИК ТА ПОШУК
-function updateCartUI() {
-    const badge = document.getElementById('cart-count');
-    const list = document.getElementById('cart-items-list');
-    
-    let total = 0, count = 0;
-    Object.values(cart).forEach(item => {
-        total += item.price * item.qty;
-        count += item.qty;
-    });
-    
-    if (badge) badge.innerText = count;
-    localStorage.setItem('shop_cart', JSON.stringify(cart));
-
-    if (list) {
-        // Логіка для сторінки кошика ( cart.html )
-        list.innerHTML = Object.values(cart).map(item => `
-            <div class="cart-item-card">
-                <div class="cart-item-main">
-                    <img src="${window.location.pathname.includes('pages') ? '../'+item.imgs[0] : item.imgs[0]}" class="cart-img-min">
-                    <b>${item.title}</b>
-                    <button onclick="deleteItem(${item.id})">🗑️</button>
-                </div>
-                <div class="cart-item-controls">
-                    <div>
-                        <button onclick="changeQty(${item.id}, -1)">-</button>
-                        <span>${item.qty}</span>
-                        <button onclick="changeQty(${item.id}, 1)">+</button>
-                    </div>
-                    <div class="price-new">${item.price * item.qty} ₴</div>
-                </div>
-            </div>
-        `).join('');
-        const totalLabel = document.getElementById('checkout-total');
-        if (totalLabel) totalLabel.innerText = `Загалом: ${total} ₴`;
+    if (s) {
+        s.style.display = 'flex';
+        s.style.transition = 'transform 0.3s ease';
+        s.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 }
 
-// Додавання в кошик з модалки
-// Знаходимо кнопку додавання
-const addToCartBtn = document.getElementById('add-to-cart-action');
+// 4. УПРАВЛІННЯ КОШИКОМ
+function updateCartUI() {
+    localStorage.setItem('shop_cart', JSON.stringify(cart));
+    
+    // Оновлення лічильника на кнопці
+    const badge = document.getElementById('cart-count');
+    let count = Object.values(cart).reduce((sum, item) => sum + item.qty, 0);
+    if (badge) badge.innerText = count;
 
+    // Якщо ми на сторінці кошика — перемальовуємо список
+    renderCartPage();
+}
+
+const addToCartBtn = document.getElementById('add-to-cart-action');
 if (addToCartBtn) {
     addToCartBtn.onclick = () => {
+        if (!currentProduct) return;
         const id = currentProduct.id;
 
-        // Додаємо товар у об'єкт кошика
         if (cart[id]) {
             cart[id].qty++;
         } else {
             cart[id] = {
-                ...currentProduct,
-                qty: 1,
-                price: currentProduct.currentPrice
+                id: currentProduct.id,
+                title: currentProduct.title,
+                price: currentProduct.currentPrice,
+                imgs: currentProduct.imgs,
+                qty: 1
             };
-        
-
-        // Оновлюємо інтерфейс та пам'ять
-        updateCartUI();
-
-        // --- ОСЬ ТУТ ЦЕЙ НОВИЙ ШМАТОЧОК (ПІСЛЯ updateCartUI) ---
-        const cartIcon = document.querySelector('.nav-btn-link[href="cart.html"]');
-        if (cartIcon) {
-            cartIcon.classList.add('cart-bounce-active');
-            setTimeout(() => {
-                cartIcon.classList.remove('cart-bounce-active');
-            }, 400);
         }
-        // ------------------------------------------------------
 
-        // ЕФЕКТ ГАЛОЧКИ (твій старий код, що йде далі...)
-        const originalText = addToCartBtn.innerHTML;
-        // ... і так далі
-    };
-
-
-        // Оновлюємо інтерфейс та пам'ять
         updateCartUI();
 
-        // --- ЕФЕКТ ГАЛОЧКИ ---
-        const originalText = addToCartBtn.innerHTML; // Запам'ятовуємо старий текст ("Додати в кошик")
-        
-        addToCartBtn.innerHTML = "Додано ✅"; // Міняємо на галочку
-        addToCartBtn.style.background = "#2ecc71"; // Робимо кнопку зеленою (опціонально)
-        addToCartBtn.disabled = true; // Вимикаємо на секунду, щоб не тиснули сто разів
-
+        // Анімація кнопки
+        const originalText = addToCartBtn.innerHTML;
+        addToCartBtn.innerHTML = "Додано ✅";
+        addToCartBtn.style.background = "#2ecc71";
         setTimeout(() => {
-            addToCartBtn.innerHTML = originalText; // Повертаємо текст назад
-            addToCartBtn.style.background = ""; // Повертаємо колір
-            addToCartBtn.disabled = false;
-        }, 1500); // Ефект триватиме 1.5 секунди
+            addToCartBtn.innerHTML = originalText;
+            addToCartBtn.style.background = "";
+        }, 1000);
     };
+}
+
+// Функція для сторінки cart.html
+function renderCartPage() {
+    const list = document.getElementById('cart-items-list'); // Має бути такий ID в cart.html
+    const totalLabel = document.getElementById('checkout-total');
+    if (!list) return;
+
+    const cartArray = Object.values(cart);
+    
+    if (cartArray.length === 0) {
+        list.innerHTML = "<p style='text-align:center; color: #888;'>Кошик порожній...</p>";
+        if (totalLabel) totalLabel.innerText = "Разом: 0 ₴";
+        return;
+    }
+
+    let total = 0;
+    list.innerHTML = cartArray.map(item => {
+        total += item.price * item.qty;
+        return `
+            <div class="cart-item-card" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #eee;">
+                <img src="${item.imgs[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:5px;">
+                <div style="flex:1;">
+                    <b style="display:block;">${item.title}</b>
+                    <span style="color:#ff9500; font-weight:bold;">${item.price} ₴</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <button onclick="changeQty(${item.id}, -1)" style="width:25px;">-</button>
+                    <span>${item.qty}</span>
+                    <button onclick="changeQty(${item.id}, 1)" style="width:25px;">+</button>
+                </div>
+                <button onclick="deleteItem(${item.id})" style="background:none; border:none; color:red; cursor:pointer;">🗑️</button>
+            </div>
+        `;
+    }).join('');
+
+    if (totalLabel) totalLabel.innerText = `Разом: ${total} ₴`;
 }
 
 window.changeQty = (id, delta) => {
@@ -221,7 +193,7 @@ window.deleteItem = (id) => {
     updateCartUI();
 };
 
-// Пошук
+// 5. ПОШУК ТА КАТЕГОРІЇ
 const searchInput = document.getElementById('searchInput');
 if (searchInput) {
     searchInput.oninput = (e) => {
@@ -233,7 +205,6 @@ if (searchInput) {
     };
 }
 
-// Категорії
 document.querySelectorAll('.cat-btn').forEach(btn => {
     btn.onclick = () => {
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
@@ -242,25 +213,8 @@ document.querySelectorAll('.cat-btn').forEach(btn => {
     };
 });
 
-// СТАРТ
-renderProducts();
-updateCartUI();
-// Функція плавної прокрутки вгору
-window.scrollToTop = () => {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
-};
-
-// Стежимо за скролом сторінки
-window.onscroll = function() {
-    const btn = document.getElementById("backToTop");
-    if (btn) {
-        if (document.body.scrollTop > 400 || document.documentElement.scrollTop > 400) {
-            btn.classList.add("show");
-        } else {
-            btn.classList.remove("show");
-        }
-    }
-};
+// ЗАПУСК
+document.addEventListener('DOMContentLoaded', () => {
+    renderProducts();
+    updateCartUI();
+});

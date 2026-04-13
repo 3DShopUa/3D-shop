@@ -415,3 +415,186 @@ input.invalid + .error-msg {
     justify-content: center;
     border: 2px solid white;
 }
+
+    /* Клас для підсвітки помилки */
+    .input-error {
+        border: 2px solid #ff4444 !important;
+        box-shadow: 0 0 10px rgba(255, 68, 68, 0.5) !important;
+        transition: all 0.3s ease;
+    }
+	/* =========================================
+   1. ЗМІННІ (Для легкого перемикання тем)
+   ========================================= */
+:root {
+    --bg-color: #f0f0f0;
+    --card-bg: #1a1a1a;
+    --text-color: #1a1a1a;
+    --input-bg: #252525;
+    --border-color: #333333;
+    --accent-color: #ff9500; /* Твій помаранчевий */
+    --error-color: #ff4444;
+}
+
+/* Налаштування для СВІТЛОЇ теми */
+body.light-theme {
+    --bg-color: #f4f4f4;
+    --card-bg: #ffffff;
+    --text-color: #1a1a1a;
+    --input-bg: #ffffff;
+    --border-color: #dddddd;
+}
+
+/* =========================================
+   2. ЗАГАЛЬНІ СТИЛІ
+   ========================================= */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    transition: background 0.3s, color 0.3s;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h2 {
+    color: var(--text-color);
+    border-bottom: 2px solid var(--accent-color);
+    display: inline-block;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+}
+
+/* =========================================
+   3. КАРТКИ ТОВАРІВ (КОШИК)
+   ========================================= */
+.cart-item-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--card-bg);
+    padding: 15px;
+    border-radius: 15px;
+    margin-bottom: 15px;
+    border: 2px solid var(--accent-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s;
+}
+
+.cart-item-card:hover {
+    transform: scale(1.01);
+}
+
+.cart-img-min {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
+}
+
+.cart-item-card b {
+    flex: 1;
+    color: var(--text-color);
+}
+
+/* КРУГЛІ КНОПКИ +/- */
+.cart-item-card button {
+    width: 32px;
+    height: 32px;
+    border-radius: 50% !important;
+    border: 1px solid var(--accent-color);
+    background: var(--input-bg);
+    color: var(--accent-color);
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.3s;
+}
+
+.cart-item-card button:hover {
+    background: var(--accent-color);
+    color: #000;
+}
+
+/* =========================================
+   4. ФОРМА ТА ПОЛЯ ВВОДУ
+   ========================================= */
+.checkout-form {
+    background: var(--card-bg);
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid var(--border-color);
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #888;
+    font-size: 14px;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 12px;
+    background: var(--input-bg);
+    border: 2px solid var(--accent-color);
+    border-radius: 12px;
+    color: var(--text-color);
+    outline: none;
+    box-sizing: border-box;
+    transition: 0.3s;
+}
+
+input:focus, textarea:focus {
+    box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+}
+
+/* ПІДСВІТКА ПОМИЛОК */
+.error-field {
+    border: 2px solid var(--error-color) !important;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.4) !important;
+}
+
+/* =========================================
+   5. КНОПКИ ТА АКЦЕНТИ
+   ========================================= */
+.btn-confirm {
+    width: 100%;
+    padding: 18px;
+    background: linear-gradient(90deg, #ff9500, #ff5e00);
+    border: none;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    font-size: 20px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+    box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+}
+
+.btn-confirm:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
+}
+
+.total-price {
+    font-size: 28px;
+    color: var(--accent-color);
+    font-weight: bold;
+    text-align: center;
+    padding: 15px;
+}
+

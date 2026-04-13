@@ -62,3 +62,5 @@ window.onclick = (event) => {
 
 // Запуск при завантаженні
 document.addEventListener('DOMContentLoaded', renderReviews);
+
+
