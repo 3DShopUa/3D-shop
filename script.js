@@ -93,8 +93,7 @@ window.moveSlide = (n) => {
 function updateModalSlider() {
     const s = document.getElementById('product-slides');
     if (s) {
-        s.style.display = 'flex';
-        s.style.transition = 'transform 0.3s ease';
+        // Рухаємо слайдер на ширину контейнера (100%)
         s.style.transform = `translateX(-${currentSlide * 100}%)`;
     }
 }
@@ -116,23 +115,52 @@ const addToCartBtn = document.getElementById('add-to-cart-action');
 if (addToCartBtn) {
     addToCartBtn.onclick = () => {
         if (!currentProduct) return;
+        
+        // 1. Отримуємо дані за твоїм ключем
+        let cartData = JSON.parse(localStorage.getItem('shop_cart')) || {};
         const id = currentProduct.id;
 
-        if (cart[id]) {
-            cart[id].qty++;
+        // 2. Оновлюємо або створюємо товар
+       
+        if (cartData[id]) {
+            cartData[id].qty++;
         } else {
-            cart[id] = {
-                id: currentProduct.id,
-                title: currentProduct.title,
-                price: currentProduct.currentPrice,
-                imgs: currentProduct.imgs,
-                qty: 1
-            };
+            // Перевіряємо, що саме лежить в currentProduct.imgs
+            let productImg = 'img/no-photo.jpg';
+            
+            if (currentProduct.imgs && currentProduct.imgs.length > 0) {
+                // Беремо найперше фото з масиву
+                productImg = currentProduct.imgs[0];
+            } else if (currentProduct.image) {
+                // Якщо раптом у тебе поле називається просто image
+                productImg = currentProduct.image;
+            }
+
+            // У твоєму index.js змініть частину створення товару:
+cartData[id] = {
+    id: currentProduct.id,
+    title: currentProduct.title,
+    price: currentProduct.currentPrice,
+    allImgs: currentProduct.imgs, // ЗБЕРІГАЄМО ВЕСЬ МАСИВ ФОТО
+    qty: 1
+};
+        }
+        // ... далі запис у localStorage ...
+
+        // 3. ЗАПИСУЄМО В ПАМ'ЯТЬ (це найважливіше!)
+        localStorage.setItem('shop_cart', JSON.stringify(cartData));
+
+        // 4. ОНОВЛЮЄМО ВНУТРІШНЮ ЗМІННУ (щоб не ламався updateCartUI)
+        if (typeof cart !== 'undefined') {
+            cart = cartData; 
         }
 
-        updateCartUI();
+        // 5. Оновлюємо інтерфейс на головній
+        if (typeof updateCartUI === "function") {
+            updateCartUI();
+        }
 
-        // Анімація кнопки
+        // Твоя анімація кнопки
         const originalText = addToCartBtn.innerHTML;
         addToCartBtn.innerHTML = "Додано ✅";
         addToCartBtn.style.background = "#2ecc71";
@@ -160,21 +188,26 @@ function renderCartPage() {
     let total = 0;
     list.innerHTML = cartArray.map(item => {
         total += item.price * item.qty;
-        return `
-            <div class="cart-item-card" style="display:flex; align-items:center; gap:15px; background:white; padding:10px; border-radius:10px; margin-bottom:10px; border:1px solid #eee;">
-                <img src="${item.imgs[0]}" style="width:60px; height:60px; object-fit:cover; border-radius:5px;">
-                <div style="flex:1;">
-                    <b style="display:block;">${item.title}</b>
-                    <span style="color:#ff9500; font-weight:bold;">${item.price} ₴</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <button onclick="changeQty(${item.id}, -1)" style="width:25px;">-</button>
-                    <span>${item.qty}</span>
-                    <button onclick="changeQty(${item.id}, 1)" style="width:25px;">+</button>
-                </div>
-                <button onclick="deleteItem(${item.id})" style="background:none; border:none; color:red; cursor:pointer;">🗑️</button>
-            </div>
-        `;
+        return // Приклад того, як у тебе в коді слайдера має генеруватися кнопка:
+`
+<button onclick="
+    let cart = JSON.parse(localStorage.getItem('shop_cart')) || {};
+    const id = '${product.id}';
+    if(cart[id]) {
+        cart[id].qty += 1;
+    } else {
+        cart[id] = {
+            id: id,
+            title: '${product.title}',
+            price: ${product.price},
+            image: '${product.image}', // ОСЬ ТУТ: воно візьме шлях img/gekon.jpg
+            qty: 1
+        };
+    }
+    localStorage.setItem('shop_cart', JSON.stringify(cart));
+    alert('Додано!');
+" class="buy-btn">Купити</button>
+`;
     }).join('');
 
     if (totalLabel) totalLabel.innerText = `Разом: ${total} ₴`;

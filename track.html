@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Трекінг замовлення | 3DPrintCraftUA</title>
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+        h1 { color: #ff6a00; margin-bottom: 30px; }
+        .track-card {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(255, 106, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .status-badge {
+            background: #ff6a00;
+            color: black;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 15px 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+        #loading { color: #ff6a00; font-size: 18px; }
+        .btn-home {
+            margin-top: 25px;
+            display: inline-block;
+            color: #ff6a00;
+            text-decoration: none;
+            border: 1px solid #ff6a00;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .btn-home:hover { background: #ff6a00; color: black; }
+    </style>
+</head>
+<body>
+
+    <h1>Ваше замовлення 🚀</h1>
+
+    <div class="track-card">
+        <div id="loading">Завантаження даних... ⏳</div>
+        
+        <div id="order-data" style="display: none;">
+            <div id="status-text" class="status-badge">ОБРОБКА</div>
+            
+            <div class="info-row">
+                <span>Клієнт:</span>
+                <b id="display-name">---</b>
+            </div>
+            
+            <div class="info-row">
+                <span>Сума:</span>
+                <b id="display-total">0 ₴</b>
+            </div>
+            
+            <div class="info-row">
+                <span>Дата:</span>
+                <span id="display-date" style="color: #888;">--.--.----</span>
+            </div>
+        </div>
+
+        <div id="error-msg" style="display: none; color: #ff4444;">
+            Замовлення не знайдено. Перевірте номер телефону.
+        </div>
+    </div>
+
+    <a href="index.html" class="btn-home">Повернутися в магазин</a>
+
+    <script>
+        // Твої дані Firebase, які ти давав раніше
+        const firebaseConfig = {
+            apiKey: "8756666594:AAHpx1RL_NXlKxSzWCBP23HjB8wLJVk0gRw", // Твій API бот токен (якщо ти його використовуєш як ключ)
+            databaseURL: "https://shop-3d-b2866-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "shop-3d-b2866",
+            storageBucket: "shop-3d-b2866.appspot.com",
+            messagingSenderId: "5796612318",
+            appId: "1:5796612318:web:78a3c8d9e0f1g2h3" // Приблизний ID
+        };
+
+        // Ініціалізація
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const database = firebase.database();
+
+        async function getOrderStatus() {
+            const phone = localStorage.getItem('tracked_phone');
+            const loading = document.getElementById('loading');
+            const orderData = document.getElementById('order-data');
+            const errorMsg = document.getElementById('error-msg');
+
+            if (!phone) {
+                loading.innerText = "Номер замовлення не знайдено в браузері.";
+                return;
+            }
+
+            try {
+                const snapshot = await database.ref('orders/' + phone).once('value');
+                const data = snapshot.val();
+
+                loading.style.display = 'none';
+
+                if (data) {
+                    document.getElementById('display-name').innerText = data.name || "Клієнт";
+                    document.getElementById('status-text').innerText = data.status || "ОБРОБКА";
+                    document.getElementById('display-total').innerText = (data.total || "0") + " ₴";
+                    document.getElementById('display-date').innerText = data.date || "щойно";
+                    
+                    orderData.style.display = 'block';
+                } else {
+                    errorMsg.style.display = 'block';
+                }
+            } catch (error) {
+                console.error(error);
+                loading.innerText = "Помилка зв'язку з базою.";
+            }
+        }
+
+        window.onload = getOrderStatus;
+    </script>
+</body>
+</html>

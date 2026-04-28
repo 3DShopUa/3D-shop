@@ -37,7 +37,14 @@
         <div class="modal-content">
             <span class="close-btn" id="close-modal-btn">&times;</span>
             <div class="slider-container"><span class="close-btn" onclick="closeProduct()">&times;</span>
-                <div class="slides" id="product-slides"></div>
+                <div class="modal-slider-container" style="position: relative; overflow: hidden; width: 100%;">
+    <div id="product-slides" style="display: flex; transition: transform 0.3s ease;">
+        </div>
+
+    <button onclick="moveSlide(-1)" class="slider-btn prev" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10;">❮</button>
+    
+    <button onclick="moveSlide(1)" class="slider-btn next" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10;">❯</button>
+</div>
             </div>
             <div class="product-info">
                 <h2 id="p-title"></h2>
